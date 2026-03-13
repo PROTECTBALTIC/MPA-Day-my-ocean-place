@@ -306,7 +306,7 @@ async function uploadPhoto(file){
 const fileName = Date.now()+"_"+file.name;
 
 const { error } = await supabaseClient.storage
-.from('MPA Day sea photos')
+.from('mpa-day-sea-photos')
 .upload(fileName, file);
 
 if(error){
@@ -315,7 +315,7 @@ return null;
 }
 
 const { data } = supabaseClient.storage
-.from('MPA Days sea photos')
+.from('mpa-day-sea-photos')
 .getPublicUrl(fileName);
 
 return data.publicUrl;
