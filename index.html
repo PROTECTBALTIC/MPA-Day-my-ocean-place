@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Sea Connections Map</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
+
+<!-- Supabase client -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body{margin:0;font-family:'Inter',sans-serif;display:flex;height:100vh;background:#dff3ff}
+#map{flex:1}
+#panel{width:380px;padding:20px;background:white;overflow:auto;box-shadow:0 0 25px rgba(0,0,0,0.15)}
+h2{margin-top:0;color:#0b7285}
+
+input,textarea,select,button{
+width:100%;
+margin-bottom:10px;
+padding:9px;
+border-radius:6px;
+border:1px solid #ccc;
+font-family:inherit
+}
+
+button{
+background:#0b7285;
+color:white;
+border:none;
+font-weight:600;
+cursor:pointer
+}
+
+button:hover{background:#0a5c6b}
+
+.story-card{
+border-bottom:1px solid #eee;
+padding:8px 0;
+font-size:14px
+}
+
+img.popup-photo{
+width:230px;
+border-radius:10px;
+margin-top:6px
+}
+
+.notice{
+background:#fff3cd;
+padding:10px;
+border-radius:6px;
+margin-bottom:12px;
+font-size:13px
+}
+</style>
+</head>
+<body>
+
+<div id="panel">
+<h2>🌊 Sea Connections</h2>
+
+<div class="notice">
+Replace <b>YOUR_SUPABASE_URL</b> and <b>YOUR_SUPABASE_ANON_KEY</b> in the code before deploying.
+</div>
+
+<p>Share the sea place that matters most to you.</p>
+
+<b>1.</b> Click where you live<br>
+<b>2.</b> Click your favourite sea place<br>
+<b>3.</b> Tell the story
+
+<br><br>
+
+<input id="name" placeholder="Your name (optional)">
+
+<textarea id="note" placeholder="Why is this sea place meaningful to you?"></textarea>
+
+<label>Upload a photo</label>
+<input type="file" id="photo" accept="image/*">
+
+<label>Choose a marine marker</label>
+<select id="style"></select>
+
+<button onclick="saveEntry()">Share my sea place</button>
+
+<h3>Recent stories</h3>
+<div id="entries"></div>
+
+</div>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+
+<script>
+
+/* =============================
+SUPABASE CONFIG
+============================= */
+
+/* =============================
+DEMO MODE
+Set DEMO_MODE = true to run a fully visual demo with example stories
+(no backend required). Set to false for production.
+============================= */
+
+const DEMO_MODE = true;
+
+const SUPABASE_URL = "YOUR_SUPABASE_URL";
+const SUPABASE_KEY = "YOUR_SUPABASE_ANON_KEY";
+
+/*
+IMPORTANT FIX:
+We avoid naming the variable "supabase" because the CDN
+already defines a global called supabase. Re‑declaring it
+causes the error: "Identifier 'supabase' has already been declared".
+*/
+
+/*
+Create Supabase client.
+The CDN exposes a global named `supabase`, so we must NOT redeclare
+`const supabase`. Instead we create our own variable name.
+*/
+
+let supabaseClient = null;
+
+/* Example demo data so the map looks populated */
+const DEMO_DATA = [
+{
+name:"Anna",
+note:"This rocky Baltic shoreline is where I learned to swim every summer.",
+style:0,
+photo_url:"https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600",
+home_lat:60.1699,
+home_lng:24.9384,
+sea_lat:59.9,
+sea_lng:23.2
+},
+{
+name:"Mikko",
+note:"Best fishing spot with my grandfather.",
+style:1,
+photo_url:"https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=600",
+home_lat:61.4978,
+home_lng:23.761,
+sea_lat:60.1,
+sea_lng:21.6
+},
+{
+name:"Sara",
+note:"A peaceful island where we watch the sunset every August.",
+style:10,
+photo_url:"https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=600",
+home_lat:55.6761,
+home_lng:12.5683,
+sea_lat:55.1,
+sea_lng:11.2
+}
+];
+
+if (!DEMO_MODE && typeof supabase !== "undefined" && SUPABASE_URL !== "YOUR_SUPABASE_URL") {
+  supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+} else {
+  console.warn("Supabase not configured yet. Map will run in preview mode.");
+}
+
+const entriesEl = document.getElementById("entries");
+
+/* =============================
+MARINE ICONS
+============================= */
+
+const marineIcons=[
+"🌊","🐟","🐠","🐡","🦑","🦀","🐚","⚓","🛥️","⛵",
+"🪸","🐬","🐳","🦈","🏝️","🌅","🪼","🐋","🦭","🐙"
+];
+
+const styleSelect=document.getElementById("style");
+marineIcons.forEach((icon,i)=>{
+const opt=document.createElement("option");
+opt.value=i;
+opt.textContent=icon+" style "+(i+1);
+styleSelect.appendChild(opt);
+});
+
+/* =============================
+MAP
+============================= */
+
+const map=L.map('map',{worldCopyJump:true}).setView([55,10],3);
+
+L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{
+maxZoom:19,
+attribution:'©OpenStreetMap ©Carto'
+}).addTo(map);
+
+const cluster=L.markerClusterGroup();
+map.addLayer(cluster);
+
+/* =============================
+CLICK INPUT
+Allow users to change their selections
+============================= */
+
+let homeLatLng=null;
+let seaLatLng=null;
+let homeMarker=null;
+let seaMarker=null;
+
+function clearSelections(){
+
+homeLatLng=null;
+seaLatLng=null;
+
+if(homeMarker){
+map.removeLayer(homeMarker);
+homeMarker=null;
+}
+
+if(seaMarker){
+map.removeLayer(seaMarker);
+seaMarker=null;
+}
+
+}
+
+map.on('click',e=>{
+
+/* Select or move home marker */
+if(!homeLatLng){
+
+homeLatLng=e.latlng;
+
+homeMarker=L.circleMarker(e.latlng,{radius:7,color:'#339af0'})
+.addTo(map)
+.bindPopup("Home location (click map again to move)")
+.openPopup();
+
+return;
+
+}
+
+/* Select or move sea marker */
+if(!seaLatLng){
+
+seaLatLng=e.latlng;
+
+seaMarker=L.circleMarker(e.latlng,{radius:7,color:'#20c997'})
+.addTo(map)
+.bindPopup("Favourite sea place (click again to move)")
+.openPopup();
+
+return;
+
+}
+
+/* If both already exist, move the closest marker */
+
+const distHome = map.distance(e.latlng, homeLatLng);
+const distSea = map.distance(e.latlng, seaLatLng);
+
+if(distHome < distSea){
+
+homeLatLng=e.latlng;
+homeMarker.setLatLng(e.latlng);
+
+}else{
+
+seaLatLng=e.latlng;
+seaMarker.setLatLng(e.latlng);
+
+}
+
+});
+
+function createEmojiIcon(emoji){
+return L.divIcon({
+className:'',
+html:`<div style="font-size:30px">${emoji}</div>`,
+iconSize:[34,34],
+iconAnchor:[17,17]
+});
+}
+
+/* =============================
+LOAD STORIES
+============================= */
+
+async function loadEntries(){
+
+/* If Supabase is not configured yet, just skip loading */
+if(DEMO_MODE){
+
+entriesEl.innerHTML="";
+cluster.clearLayers();
+
+DEMO_DATA.forEach(d=>{
+
+const icon=createEmojiIcon(marineIcons[d.style]);
+
+const home=L.marker([d.home_lat,d.home_lng],{icon});
+const sea=L.marker([d.sea_lat,d.sea_lng],{icon});
+
+cluster.addLayer(home);
+cluster.addLayer(sea);
+
+L.polyline([
+[d.home_lat,d.home_lng],
+[d.sea_lat,d.sea_lng]
+],{
+color:'#1c7ed6',
+weight:2,
+opacity:0.6,
+dashArray:'6'
+}).addTo(map);
+
+let popup=`<b>${d.name}</b><br>${d.note}`;
+
+if(d.photo_url){
+popup+=`<br><img class="popup-photo" src="${d.photo_url}">`;
+}
+
+sea.bindPopup(popup);
+
+const div=document.createElement('div');
+div.className='story-card';
+div.innerHTML=`<b>${marineIcons[d.style]} ${d.name}</b><br>${d.note}`;
+
+entriesEl.appendChild(div);
+
+});
+
+return;
+}
+
+if(!supabaseClient){
+console.log("Preview mode: backend disabled.");
+return;
+}
+
+const { data, error } = await supabaseClient
+.from('sea_connections')
+.select('*')
+.order('created_at', { ascending:false });
+
+if(error){
+console.error("Error loading entries:",error);
+return;
+}
+
+entriesEl.innerHTML="";
+cluster.clearLayers();
+
+ data.forEach(d=>{
+
+const icon=createEmojiIcon(marineIcons[d.style]);
+
+const home=L.marker([d.home_lat,d.home_lng],{icon});
+const sea=L.marker([d.sea_lat,d.sea_lng],{icon});
+
+cluster.addLayer(home);
+cluster.addLayer(sea);
+
+L.polyline([
+[d.home_lat,d.home_lng],
+[d.sea_lat,d.sea_lng]
+],{
+color:'#1c7ed6',
+weight:2,
+opacity:0.6,
+dashArray:'6'
+}).addTo(map);
+
+let popup=`<b>${d.name||"Anonymous"}</b><br>${d.note||""}`;
+
+if(d.photo_url){
+popup+=`<br><img class="popup-photo" src="${d.photo_url}">`;
+}
+
+sea.bindPopup(popup);
+
+const div=document.createElement('div');
+div.className='story-card';
+div.innerHTML=`<b>${marineIcons[d.style]} ${d.name||"Anonymous"}</b><br>${d.note||""}`;
+
+entriesEl.appendChild(div);
+
+});
+
+}
+
+/* =============================
+UPLOAD PHOTO
+============================= */
+
+async function uploadPhoto(file){
+
+if(!supabaseClient){
+console.warn("Photo upload disabled in preview mode");
+return null;
+}
+
+
+const fileName = Date.now()+"_"+file.name;
+
+const { error } = await supabaseClient.storage
+.from('sea-photos')
+.upload(fileName, file);
+
+if(error){
+console.error("Upload error",error);
+return null;
+}
+
+const { data } = supabaseClient.storage
+.from('sea-photos')
+.getPublicUrl(fileName);
+
+return data.publicUrl;
+
+}
+
+/* =============================
+SAVE ENTRY
+============================= */
+
+async function saveEntry(){
+
+if(!supabaseClient){
+alert("Backend not configured yet. This preview cannot save data.");
+return;
+}
+
+
+if(!homeLatLng||!seaLatLng){
+alert("Click home and favourite sea place first.");
+return;
+}
+
+let photoURL=null;
+
+const photoInput=document.getElementById('photo');
+
+if(photoInput.files.length>0){
+photoURL = await uploadPhoto(photoInput.files[0]);
+}
+
+const entry={
+name:document.getElementById('name').value,
+note:document.getElementById('note').value,
+style:parseInt(document.getElementById('style').value),
+photo_url:photoURL,
+home_lat:homeLatLng.lat,
+home_lng:homeLatLng.lng,
+sea_lat:seaLatLng.lat,
+sea_lng:seaLatLng.lng
+};
+
+const { error } = await supabaseClient
+.from('sea_connections')
+.insert([entry]);
+
+if(error){
+alert("Error saving entry");
+console.error(error);
+return;
+}
+
+location.reload();
+
+}
+
+/* =============================
+BASIC RUNTIME TESTS
+============================= */
+
+function runDiagnostics(){
+
+console.log("Running diagnostics...");
+
+console.assert(typeof L !== "undefined","Leaflet failed to load");
+console.assert(true,"Supabase client not initialized");
+console.assert(Array.isArray(marineIcons),"Marine icons not loaded");
+
+console.log("Diagnostics complete.");
+
+}
+
+runDiagnostics();
+loadEntries();
+
+</script>
+
+</body>
+</html>
