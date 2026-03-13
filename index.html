@@ -108,65 +108,11 @@ Set DEMO_MODE = true to run a fully visual demo with example stories
 (no backend required). Set to false for production.
 ============================= */
 
-const DEMO_MODE = false;
-
 const SUPABASE_URL = "https://yuifiafsiuuiqtdkxgii.supabase.co";
 const SUPABASE_KEY = "sb_publishable_M7fp8R7B9kQZemV-sFwcIw_zEIN3Y_t";
 
-/*
-IMPORTANT FIX:
-We avoid naming the variable "supabase" because the CDN
-already defines a global called supabase. Re‑declaring it
-causes the error: "Identifier 'supabase' has already been declared".
-*/
-
-/*
-Create Supabase client.
-The CDN exposes a global named `supabase`, so we must NOT redeclare
-`const supabase`. Instead we create our own variable name.
-*/
-
-let supabaseClient = null;
-
-/* Example demo data so the map looks populated */
-const DEMO_DATA = [
-{
-name:"Anna",
-note:"This rocky Baltic shoreline is where I learned to swim every summer.",
-style:0,
-photo_url:"https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600",
-home_lat:60.1699,
-home_lng:24.9384,
-sea_lat:59.9,
-sea_lng:23.2
-},
-{
-name:"Mikko",
-note:"Best fishing spot with my grandfather.",
-style:1,
-photo_url:"https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=600",
-home_lat:61.4978,
-home_lng:23.761,
-sea_lat:60.1,
-sea_lng:21.6
-},
-{
-name:"Sara",
-note:"A peaceful island where we watch the sunset every August.",
-style:10,
-photo_url:"https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=600",
-home_lat:55.6761,
-home_lng:12.5683,
-sea_lat:55.1,
-sea_lng:11.2
-}
-];
-
-if (!DEMO_MODE && typeof supabase !== "undefined" && SUPABASE_URL !== "YOUR_SUPABASE_URL") {
-  supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-} else {
-  console.warn("Supabase not configured yet. Map will run in preview mode.");
-}
+/* Create Supabase client directly (production mode) */
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const entriesEl = document.getElementById("entries");
 
@@ -293,54 +239,9 @@ LOAD STORIES
 async function loadEntries(){
 
 /* If Supabase is not configured yet, just skip loading */
-if(DEMO_MODE){
 
-entriesEl.innerHTML="";
-cluster.clearLayers();
 
-DEMO_DATA.forEach(d=>{
 
-const icon=createEmojiIcon(marineIcons[d.style]);
-
-const home=L.marker([d.home_lat,d.home_lng],{icon});
-const sea=L.marker([d.sea_lat,d.sea_lng],{icon});
-
-cluster.addLayer(home);
-cluster.addLayer(sea);
-
-L.polyline([
-[d.home_lat,d.home_lng],
-[d.sea_lat,d.sea_lng]
-],{
-color:'#1c7ed6',
-weight:2,
-opacity:0.6,
-dashArray:'6'
-}).addTo(map);
-
-let popup=`<b>${d.name}</b><br>${d.note}`;
-
-if(d.photo_url){
-popup+=`<br><img class="popup-photo" src="${d.photo_url}">`;
-}
-
-sea.bindPopup(popup);
-
-const div=document.createElement('div');
-div.className='story-card';
-div.innerHTML=`<b>${marineIcons[d.style]} ${d.name}</b><br>${d.note}`;
-
-entriesEl.appendChild(div);
-
-});
-
-return;
-}
-
-if(!supabaseClient){
-console.log("Preview mode: backend disabled.");
-return;
-}
 
 const { data, error } = await supabaseClient
 .from('sea_connections')
@@ -399,10 +300,7 @@ UPLOAD PHOTO
 
 async function uploadPhoto(file){
 
-if(!supabaseClient){
-console.warn("Photo upload disabled in preview mode");
-return null;
-}
+
 
 
 const fileName = Date.now()+"_"+file.name;
@@ -430,10 +328,7 @@ SAVE ENTRY
 
 async function saveEntry(){
 
-if(!supabaseClient){
-alert("Backend not configured yet. This preview cannot save data.");
-return;
-}
+
 
 
 if(!homeLatLng||!seaLatLng){
