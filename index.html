@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Sea Connections Map</title>
+<title>My Ocean Place</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
@@ -74,37 +74,37 @@ gap:10px;
 <div id="panel">
 <h2 class="title">
 <img src="MPADay_Logo_blue_transp.png" class="logo">
-Sea Connections
+My Ocean Place
 </h2>
-<div class="subtitle">Share the sea place that matters most to you.</div>
+<div class="subtitle">The ocean is full of places worth protecting.<b>Tell us yours.</b></div>
 
 <div class="instructions">
-<div class="step-row"><span class="step active">1</span><span class="step-text">Click where you live</span></div>
-<div class="step-row"><span class="step">2</span><span class="step-text">Click your favourite sea place</span></div>
-<div class="step-row"><span class="step">3</span><span class="step-text">Tell your story</span></div>
+<div class="step-row"><span class="step active">1</span><span class="step-text">Click where you're from</span></div>
+<div class="step-row"><span class="step">2</span><span class="step-text">Click the ocean place you love</span></div>
+<div class="step-row"><span class="step">3</span><span class="step-text">Tell us why it matters to you</span></div>
 </div>
 
 <input id="name" placeholder="Your name (optional)">
 <input id="home_place" placeholder="Your home city or place" required>
 <input id="sea_place" placeholder="Name of your favourite sea place" required>
-<textarea id="note" placeholder="Why is this sea place meaningful to you?"></textarea>
+<textarea id="note" placeholder="Why is this place meaningful to you?"></textarea>
 
-<label>Upload a photo</label>
+<label>Upload a photo (File size: 400 KB max.)</label>
 <input type="file" id="photo" accept="image/*">
 <img id="preview">
 
-<label>Choose a marine marker</label>
+<label>Choose your favourite marine marker</label>
 <select id="style"></select>
 
-<button id="submitBtn" onclick="saveEntry()" disabled>Share my sea place</button>
-<button class="secondary" onclick="clearSelections()">Reset points</button>
+<button id="submitBtn" onclick="saveEntry()" disabled>Share your ocean story</button>
+<button class="secondary" onclick="clearSelections()">Reset markers</button>
 
 <h3>Recent stories</h3>
 <div id="entries"></div>
 </div>
 
 <div id="map">
-<div id="mapHint">Click the map where you live</div>
+<div id="mapHint">Click the map to mark where you are from</div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
