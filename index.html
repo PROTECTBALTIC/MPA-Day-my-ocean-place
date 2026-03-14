@@ -224,7 +224,13 @@ function updateLine(){
  if(homeLatLng && seaLatLng){
   if(connectionLine) lineLayer.removeLayer(connectionLine);
   connectionLine=L.polyline([[homeLatLng.lat,homeLatLng.lng],[seaLatLng.lat,seaLatLng.lng]],{color:"#0078bd",weight:4,opacity:0.9,dashArray:"10 10"});
-  lineLayer.addLayer(connectionLine);
+  let offset = 0;
+
+setInterval(()=>{
+ offset = (offset + 1) % 20;
+ connectionLine.setStyle({ dashOffset: offset });
+},120);
+   lineLayer.addLayer(connectionLine);
   submitBtn.disabled=false;
  }
 }
