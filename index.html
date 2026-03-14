@@ -54,12 +54,28 @@ button:disabled{background:#adb5bd}
 .leaflet-control-layers{background:white;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,0.15);border:none;font-family:'Inter',sans-serif;padding:6px 8px}
 
 @media (max-width:800px){body{flex-direction:column;height:auto}#panel{width:100%;box-shadow:none;border-bottom:1px solid #eee}#map{height:60vh}}
+
+  .logo{
+height:36px;
+vertical-align:middle;
+margin-right:10px;
+}
+
+.title{
+display:flex;
+align-items:center;
+gap:10px;
+}
+  
 </style>
 </head>
 <body>
 
 <div id="panel">
-<h2>🌊 Sea Connections</h2>
+<h2 class="title">
+<img src="MPADay_Logo_blue_transp.png" class="logo">
+Sea Connections
+</h2>
 <div class="subtitle">Share the sea place that matters most to you.</div>
 
 <div class="instructions">
