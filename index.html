@@ -120,14 +120,16 @@ marineIcons.forEach((item,i)=>{
  styleSelect.appendChild(opt);
 });
 
-const map=L.map("map",{worldCopyJump:true,maxZoom:12,minZoom:2}).setView([55,10],3);
+/* ONLY CHANGE: maxZoom reduced to 10 */
+const map=L.map("map",{worldCopyJump:true,maxZoom:10,minZoom:2}).setView([55,10],3);
 
 L.Control.geocoder({defaultMarkGeocode:false,position:"topleft",placeholder:"Search for a location"})
 .on("markgeocode",e=>map.setView(e.geocode.center,8))
 .addTo(map);
 
-L.tileLayer("https://services.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}",{maxZoom:12}).addTo(map);
-L.tileLayer("https://services.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Reference/MapServer/tile/{z}/{y}/{x}",{maxZoom:12}).addTo(map);
+/* ONLY CHANGE: tile maxZoom reduced to 10 */
+L.tileLayer("https://services.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}",{maxZoom:10}).addTo(map);
+L.tileLayer("https://services.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Reference/MapServer/tile/{z}/{y}/{x}",{maxZoom:10}).addTo(map);
 
 const seaCluster=L.markerClusterGroup();
 const homeLayer=L.layerGroup();
