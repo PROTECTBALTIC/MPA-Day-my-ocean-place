@@ -120,14 +120,12 @@ marineIcons.forEach((item,i)=>{
  styleSelect.appendChild(opt);
 });
 
-/* ONLY CHANGE: maxZoom reduced to 10 */
 const map=L.map("map",{worldCopyJump:true,maxZoom:10,minZoom:2}).setView([55,10],3);
 
 L.Control.geocoder({defaultMarkGeocode:false,position:"topleft",placeholder:"Search for a location"})
 .on("markgeocode",e=>map.setView(e.geocode.center,8))
 .addTo(map);
 
-/* ONLY CHANGE: tile maxZoom reduced to 10 */
 L.tileLayer("https://services.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}",{maxZoom:10}).addTo(map);
 L.tileLayer("https://services.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Reference/MapServer/tile/{z}/{y}/{x}",{maxZoom:10}).addTo(map);
 
@@ -157,7 +155,6 @@ function updateStepUI(){
   steps[1].classList.add("active");
   mapHint.innerText="Now click your favourite sea place";
  }
-
  if(homeLatLng && seaLatLng){
   steps[1].classList.add("done");
   steps[1].classList.remove("active");
@@ -169,14 +166,11 @@ function updateStepUI(){
 function clearSelections(){
  homeLatLng=null;
  seaLatLng=null;
-
  if(homeMarker){map.removeLayer(homeMarker);homeMarker=null}
  if(seaMarker){map.removeLayer(seaMarker);seaMarker=null}
  if(connectionLine){lineLayer.removeLayer(connectionLine);connectionLine=null}
-
  steps.forEach(s=>s.classList.remove("done","active"));
  steps[0].classList.add("active");
-
  submitBtn.disabled=true;
  mapHint.innerText="Click the map where you live";
 }
@@ -186,12 +180,10 @@ map.on("click",e=>{
  if(!homeLatLng){
   homeLatLng=e.latlng;
   homeMarker=L.marker(e.latlng,{draggable:true}).addTo(homeLayer);
-
   homeMarker.on("dragend",()=>{
    homeLatLng=homeMarker.getLatLng();
    updateLine();
   });
-
   updateStepUI();
   return;
  }
@@ -199,12 +191,10 @@ map.on("click",e=>{
  if(!seaLatLng){
   seaLatLng=e.latlng;
   seaMarker=L.marker(e.latlng,{draggable:true}).addTo(seaCluster);
-
   seaMarker.on("dragend",()=>{
    seaLatLng=seaMarker.getLatLng();
    updateLine();
   });
-
   updateLine();
   updateStepUI();
  }
@@ -213,21 +203,14 @@ map.on("click",e=>{
 
 function updateLine(){
  if(homeLatLng && seaLatLng){
-
   if(connectionLine) lineLayer.removeLayer(connectionLine);
-
-  connectionLine=L.polyline([
-   [homeLatLng.lat,homeLatLng.lng],
-   [seaLatLng.lat,seaLatLng.lng]
-  ],{color:"#1c7ed6",weight:4,opacity:0.9,dashArray:"10 10"});
-
+  connectionLine=L.polyline([[homeLatLng.lat,homeLatLng.lng],[seaLatLng.lat,seaLatLng.lng]],{color:"#1c7ed6",weight:4,opacity:0.9,dashArray:"10 10"});
   lineLayer.addLayer(connectionLine);
   submitBtn.disabled=false;
  }
 }
 
-const photoInput=document.getElementById("photo");
-photoInput.onchange=e=>{
+document.getElementById("photo").onchange=e=>{
  const reader=new FileReader();
  reader.onload=()=>{
   const img=document.getElementById("preview");
@@ -237,81 +220,71 @@ photoInput.onchange=e=>{
  reader.readAsDataURL(e.target.files[0]);
 };
 
-async function loadEntries(){
- const {data,error}=await supabaseClient
-  .from("sea_connections")
-  .select("*")
-  .order("created_at",{ascending:false});
-
+/* NEW PHOTO UPLOAD FUNCTION */
+async function uploadPhoto(file){
+ const fileName=Date.now()+"_"+file.name;
+ const {error}=await supabaseClient.storage.from("mpa-day-sea-photos").upload(fileName,file);
  if(error){
-  console.error(error);
-  return;
+  console.error("Upload error",error);
+  return null;
  }
+ const {data}=supabaseClient.storage.from("mpa-day-sea-photos").getPublicUrl(fileName);
+ return data.publicUrl;
+}
 
+async function loadEntries(){
+ const {data,error}=await supabaseClient.from("sea_connections").select("*").order("created_at",{ascending:false});
+ if(error){console.error(error);return;}
  entriesEl.innerHTML="";
-
  data.forEach(d=>{
-
   const home=[d.home_lat,d.home_lng];
   const sea=[d.sea_lat,d.sea_lng];
-
-  const icon=L.divIcon({
-   html:`<div style="font-size:28px">${marineIcons[d.style]?.icon||"🌊"}</div>`,
-   className:""
-  });
-
+  const icon=L.divIcon({html:`<div style="font-size:28px">${marineIcons[d.style]?.icon||"🌊"}</div>`,className:""});
   L.circleMarker(home,{radius:5,color:"#339af0"}).addTo(homeLayer);
-
   const seaMarker=L.marker(sea,{icon}).addTo(seaCluster);
-
   L.polyline([home,sea],{color:"#1c7ed6",weight:3,opacity:0.6,dashArray:"8 8"}).addTo(lineLayer);
-
   let popup=`<b>${d.name||"Anonymous"}</b>`;
-
   if(d.home_place) popup+=`<br>Home: ${d.home_place}`;
   if(d.sea_place) popup+=`<br>Sea place: ${d.sea_place}`;
-
   popup+=`<br>${d.note||""}`;
-
   if(d.photo_url) popup+=`<br><img src="${d.photo_url}">`;
-
   seaMarker.bindPopup(popup);
-
   const card=document.createElement("div");
   card.className="story-card";
-
   card.innerHTML=`<b>${marineIcons[d.style]?.icon||"🌊"} ${d.name||"Anonymous"}</b><br>${d.note||""}${d.photo_url?`<img src="${d.photo_url}">`:""}`;
-
   entriesEl.appendChild(card);
  });
 }
 
+/* UPDATED SAVE ENTRY */
 async function saveEntry(){
  if(!homeLatLng || !seaLatLng){
   alert("Please select both locations");
   return;
  }
-
+ let photoURL=null;
+ const photoInput=document.getElementById("photo");
+ if(photoInput.files.length>0){
+  photoURL=await uploadPhoto(photoInput.files[0]);
+ }
  const entry={
   name:document.getElementById("name").value,
   home_place:document.getElementById("home_place").value,
   sea_place:document.getElementById("sea_place").value,
   note:document.getElementById("note").value,
   style:parseInt(document.getElementById("style").value),
+  photo_url:photoURL,
   home_lat:homeLatLng.lat,
   home_lng:homeLatLng.lng,
   sea_lat:seaLatLng.lat,
   sea_lng:seaLatLng.lng
  };
-
  const {error}=await supabaseClient.from("sea_connections").insert([entry]);
-
  if(error){
   console.error(error);
   alert("Error saving entry");
   return;
  }
-
  location.reload();
 }
 
