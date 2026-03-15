@@ -10,72 +10,29 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
 <style>
-body{
-margin:0;
-font-family:Arial, sans-serif;
-display:flex;
-height:100vh;
-}
-
-#panel{
-width:380px;
-background:white;
-padding:20px;
-overflow:auto;
-box-shadow:0 0 20px rgba(0,0,0,0.2);
-z-index:1001;
-}
-
-#map{
-flex:1;
-position:relative;
-}
+body{margin:0;font-family:Arial, sans-serif;display:flex;height:100vh;}
+#panel{width:380px;background:white;padding:20px;overflow:auto;box-shadow:0 0 20px rgba(0,0,0,0.2);z-index:1001;}
+#map{flex:1;position:relative;}
 
 .instructions{margin-bottom:20px;}
 .step-row{display:flex;align-items:center;margin-bottom:8px;}
-
-.step{
-width:26px;height:26px;border-radius:50%;
-display:flex;align-items:center;justify-content:center;
-margin-right:8px;background:#e9ecef;font-weight:bold;
-}
-
+.step{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-right:8px;background:#e9ecef;font-weight:bold;}
 .step.active{background:#0078bd;color:white;}
 .step.done{background:#6ccf8f;color:white;}
 
-input, textarea, button{
-width:100%;padding:8px;margin-bottom:10px;
-border-radius:6px;border:1px solid #ccc;
-}
-
+input, textarea, button{width:100%;padding:8px;margin-bottom:10px;border-radius:6px;border:1px solid #ccc;}
 button{background:#0078bd;color:white;border:none;font-weight:bold;cursor:pointer;}
 .secondary{background:#ddd;color:black;}
 
-.markerGrid{
-display:grid;grid-template-columns:repeat(6,1fr);
-gap:6px;margin-bottom:10px;
-}
-
-.markerOption{
-font-size:24px;text-align:center;cursor:pointer;
-border:2px solid transparent;padding:4px;border-radius:6px;
-}
-
+.markerGrid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:10px;}
+.markerOption{font-size:24px;text-align:center;cursor:pointer;border:2px solid transparent;padding:4px;border-radius:6px;}
 .markerOption.selected{border-color:#0078bd;background:#eaf3ff;}
 
-#mapHint{
-position:absolute;left:50%;bottom:25px;transform:translateX(-50%);
-background:white;padding:10px 14px;border-radius:20px;
-box-shadow:0 4px 12px rgba(0,0,0,0.2);font-size:14px;z-index:1000;
-}
-
-.layerToggle{
-position:absolute;top:15px;right:15px;background:white;
-padding:6px 10px;border-radius:6px;
-box-shadow:0 3px 10px rgba(0,0,0,0.2);cursor:pointer;z-index:1000;
-}
+#mapHint{position:absolute;left:50%;bottom:25px;transform:translateX(-50%);background:white;padding:10px 14px;border-radius:20px;box-shadow:0 4px 12px rgba(0,0,0,0.2);font-size:14px;z-index:1000;}
+.layerToggle{position:absolute;top:15px;right:15px;background:white;padding:6px 10px;border-radius:6px;box-shadow:0 3px 10px rgba(0,0,0,0.2);cursor:pointer;z-index:1000;}
 
 .clean-marker{background:none;border:none;}
+.story{border-top:1px solid #eee;padding-top:8px;margin-top:8px;font-size:14px;}
 </style>
 </head>
 
@@ -91,11 +48,11 @@ box-shadow:0 3px 10px rgba(0,0,0,0.2);cursor:pointer;z-index:1000;
 <div class="step-row"><span class="step" id="step3">3</span>Tell us why it matters</div>
 </div>
 
-<input placeholder="Your name (optional)">
-<input placeholder="Your home city">
-<input placeholder="Ocean place you love">
+<input id="name" placeholder="Your name (optional)">
+<input id="homeCity" placeholder="Your home city">
+<input id="oceanPlace" placeholder="Ocean place you love">
 
-<textarea placeholder="Why is this place meaningful?"></textarea>
+<textarea id="storyText" placeholder="Why is this place meaningful?"></textarea>
 
 <label>Upload photo</label>
 <input type="file">
@@ -104,10 +61,10 @@ box-shadow:0 3px 10px rgba(0,0,0,0.2);cursor:pointer;z-index:1000;
 <div class="markerGrid" id="markerGrid"></div>
 
 <button id="submitBtn" disabled>Share story</button>
-<button class="secondary" onclick="resetMap()">Reset markers</button>
+<button class="secondary" id="resetBtn">Reset markers</button>
 
 <h3>Stories</h3>
-<div>(stories would appear here)</div>
+<div id="stories"></div>
 
 </div>
 
@@ -120,13 +77,14 @@ box-shadow:0 3px 10px rgba(0,0,0,0.2);cursor:pointer;z-index:1000;
 
 <script>
 
+/* FIXED: proper JS array */
 const marineIcons = ["🌊","🐟","🐠","🐡","🦑","🦀","🐚","⚓","🛥️","⛵","🪸","🐬","🐳","🦈","🏝️","🌅","🪼","🐋","🦭","🐙","🌴","🏖️","🌏","🧭"];
+
 let selectedMarker = marineIcons[0];
 
 const grid = document.getElementById("markerGrid");
 
 marineIcons.forEach(icon=>{
-
 let el = document.createElement("div");
 el.className = "markerOption";
 el.innerText = icon;
@@ -138,20 +96,19 @@ el.classList.add("selected");
 };
 
 grid.appendChild(el);
-
 });
 
 grid.children[0].classList.add("selected");
 
 const map = L.map("map",{minZoom:2,maxZoom:10}).setView([20,0],2);
 
-/* ORIGINAL OCEAN BASEMAP (unchanged) */
+/* ocean basemap */
 L.tileLayer(
 "https://services.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}",
 {maxZoom:10}
 ).addTo(map);
 
-/* SAFE CITY LABEL OVERLAY */
+/* city labels */
 map.createPane('labels');
 map.getPane('labels').style.zIndex = 650;
 map.getPane('labels').style.pointerEvents = 'none';
@@ -172,7 +129,6 @@ L.DomEvent.disableClickPropagation(toggle);
 
 toggle.onclick = function(){
 connectionsVisible = !connectionsVisible;
-
 if(connectionsVisible){
 map.addLayer(homeLayer);
 map.addLayer(lineLayer);
@@ -182,11 +138,13 @@ map.removeLayer(homeLayer);
 map.removeLayer(lineLayer);
 this.innerText="Show connections";
 }
-
 };
 
 let step = 0;
 let homeLatLng = null;
+let homeMarker = null;
+let seaMarker = null;
+let connectionLine = null;
 
 function emojiMarker(icon){
 return L.divIcon({
@@ -198,7 +156,6 @@ iconAnchor:[15,15]
 }
 
 function updateSteps(){
-
 const s1=document.getElementById("step1");
 const s2=document.getElementById("step2");
 const s3=document.getElementById("step3");
@@ -210,14 +167,13 @@ s3.className="step";
 if(step===0) s1.className="step active";
 if(step===1){s1.className="step done"; s2.className="step active";}
 if(step===2){s1.className="step done"; s2.className="step done"; s3.className="step active";}
-
 }
 
 map.on("click",function(e){
 
 if(step===0){
 homeLatLng=e.latlng;
-L.marker(e.latlng,{icon:emojiMarker("🏠")}).addTo(homeLayer);
+homeMarker=L.marker(e.latlng,{icon:emojiMarker("🏠")}).addTo(homeLayer);
 document.getElementById("mapHint").innerText="Now click the ocean place you love";
 step=1;
 updateSteps();
@@ -225,8 +181,8 @@ return;
 }
 
 if(step===1){
-L.marker(e.latlng,{icon:emojiMarker(selectedMarker)}).addTo(seaLayer);
-L.polyline([homeLatLng,e.latlng],{color:"#0078bd",dashArray:"10 10"}).addTo(lineLayer);
+seaMarker=L.marker(e.latlng,{icon:emojiMarker(selectedMarker)}).addTo(seaLayer);
+connectionLine=L.polyline([homeLatLng,e.latlng],{color:"#0078bd",dashArray:"10 10"}).addTo(lineLayer);
 document.getElementById("submitBtn").disabled=false;
 document.getElementById("mapHint").innerText="Tell your story and share it";
 step=2;
@@ -235,9 +191,36 @@ updateSteps();
 
 });
 
-function resetMap(){
-location.reload();
-}
+document.getElementById("resetBtn").onclick=function(){
+if(homeMarker) homeLayer.removeLayer(homeMarker);
+if(seaMarker) seaLayer.removeLayer(seaMarker);
+if(connectionLine) lineLayer.removeLayer(connectionLine);
+
+homeMarker=null;
+seaMarker=null;
+connectionLine=null;
+homeLatLng=null;
+
+step=0;
+updateSteps();
+document.getElementById("submitBtn").disabled=true;
+document.getElementById("mapHint").innerText="Click where you live";
+};
+
+document.getElementById("submitBtn").onclick=function(){
+const name=document.getElementById("name").value;
+const home=document.getElementById("homeCity").value;
+const ocean=document.getElementById("oceanPlace").value;
+const text=document.getElementById("storyText").value;
+
+const container=document.getElementById("stories");
+
+const div=document.createElement("div");
+div.className="story";
+div.innerHTML="<strong>"+(name||"Anonymous")+"</strong><br>From: "+(home||"Unknown")+" → Loves: "+(ocean||"Ocean place")+"<br>"+(text||"");
+
+container.prepend(div);
+};
 
 updateSteps();
 
