@@ -5,26 +5,25 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>My Ocean Place – Step UI Restored</title>
+<title>My Ocean Place</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
-<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"/>
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-*{box-sizing:border-box}
-
 body{
 margin:0;
-font-family:'Inter',sans-serif;
+font-family:Arial, sans-serif;
 display:flex;
 height:100vh;
-background:linear-gradient(180deg,#c6f3ee,#4ec2ec);
-overflow:hidden;
+}
+
+#panel{
+width:380px;
+background:white;
+padding:20px;
+overflow:auto;
+box-shadow:0 0 20px rgba(0,0,0,0.2);
+z-index:1001;
 }
 
 #map{
@@ -32,57 +31,51 @@ flex:1;
 position:relative;
 }
 
-#panel{
-width:380px;
-background:white;
-padding:22px;
-overflow:auto;
-box-shadow:0 0 25px rgba(0,0,0,0.2);
-}
-
-h2{margin-top:0;color:#004470}
-.subtitle{font-size:14px;color:#555;margin-bottom:15px}
-
-.instructions{margin:16px 0 22px 0;font-size:14px}
-
-.step-row{display:flex;align-items:center;margin-bottom:12px}
+.instructions{margin-bottom:20px;}
+.step-row{display:flex;align-items:center;margin-bottom:8px;}
 
 .step{
 width:26px;height:26px;border-radius:50%;
 display:flex;align-items:center;justify-content:center;
-font-weight:600;font-size:13px;margin-right:10px;
-background:#e9ecef;
+margin-right:8px;background:#e9ecef;font-weight:bold;
 }
 
-.step.active{background:#0078bd;color:white}
-.step.done{background:#7dd3a6;color:white}
+.step.active{background:#0078bd;color:white;}
+.step.done{background:#6ccf8f;color:white;}
 
-input,textarea,select,button{
-width:100%;padding:10px;border-radius:8px;border:1px solid #ddd;
-margin-bottom:10px;font-family:inherit;
+input, textarea, button{
+width:100%;padding:8px;margin-bottom:10px;
+border-radius:6px;border:1px solid #ccc;
 }
 
-button{background:#0078bd;color:white;font-weight:600;border:none;cursor:pointer}
-.secondary{background:#dee2e6;color:#333}
+button{background:#0078bd;color:white;border:none;font-weight:bold;cursor:pointer;}
+.secondary{background:#ddd;color:black;}
 
-.clean-marker{background:none;border:none}
+.markerGrid{
+display:grid;grid-template-columns:repeat(6,1fr);
+gap:6px;margin-bottom:10px;
+}
 
-.story-card{padding:10px;border-bottom:1px solid #eee;cursor:pointer}
-.story-card:hover{background:#f2fbff}
+.markerOption{
+font-size:24px;text-align:center;cursor:pointer;
+border:2px solid transparent;padding:4px;border-radius:6px;
+}
+
+.markerOption.selected{border-color:#0078bd;background:#eaf3ff;}
 
 #mapHint{
 position:absolute;left:50%;bottom:25px;transform:translateX(-50%);
-background:white;padding:10px 16px;border-radius:20px;
-box-shadow:0 6px 18px rgba(0,0,0,0.15);
-font-size:14px;color:#004470;pointer-events:none;z-index:1000;
+background:white;padding:10px 14px;border-radius:20px;
+box-shadow:0 4px 12px rgba(0,0,0,0.2);font-size:14px;z-index:1000;
 }
 
 .layerToggle{
 position:absolute;top:15px;right:15px;background:white;
-padding:8px 12px;border-radius:8px;
-box-shadow:0 4px 10px rgba(0,0,0,0.2);
-font-size:13px;cursor:pointer;z-index:1000;
+padding:6px 10px;border-radius:6px;
+box-shadow:0 3px 10px rgba(0,0,0,0.2);cursor:pointer;z-index:1000;
 }
+
+.clean-marker{background:none;border:none;}
 </style>
 </head>
 
@@ -91,7 +84,6 @@ font-size:13px;cursor:pointer;z-index:1000;
 <div id="panel">
 
 <h2>🌊 My Ocean Place</h2>
-<div class="subtitle">The ocean is full of places worth protecting. Tell us yours.</div>
 
 <div class="instructions">
 <div class="step-row"><span class="step active" id="step1">1</span>Click where you're from</div>
@@ -99,80 +91,102 @@ font-size:13px;cursor:pointer;z-index:1000;
 <div class="step-row"><span class="step" id="step3">3</span>Tell us why it matters</div>
 </div>
 
-<input id="name" placeholder="Your name (optional)">
-<input id="home_place" placeholder="Your home city">
-<input id="sea_place" placeholder="Ocean place you love">
+<input placeholder="Your name (optional)">
+<input placeholder="Your home city">
+<input placeholder="Ocean place you love">
 
-<textarea id="note" placeholder="Why is this place meaningful?"></textarea>
+<textarea placeholder="Why is this place meaningful?"></textarea>
 
 <label>Upload photo</label>
-<input type="file" id="photo">
+<input type="file">
 
-<select id="style"></select>
+<label><b>Choose your marker</b></label>
+<div class="markerGrid" id="markerGrid"></div>
 
-<button id="submitBtn" onclick="saveEntry()" disabled>Share story</button>
+<button id="submitBtn" disabled>Share story</button>
 <button class="secondary" onclick="resetMap()">Reset markers</button>
 
 <h3>Stories</h3>
-<div id="entries"></div>
+<div>(stories would appear here)</div>
 
 </div>
 
 <div id="map">
 <div id="mapHint">Click where you live</div>
-<div id="toggleConnections" class="layerToggle">Hide connections</div>
+<div class="layerToggle" id="toggleConnections">Hide connections</div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
 <script>
 
-const SUPABASE_URL="https://yuifiafsiuuiqtdkxgii.supabase.co";
-const SUPABASE_KEY="sb_publishable_M7fp8R7B9kQZemV-sFwcIw_zEIN3Y_t";
-const supabaseClient=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const marineIcons = ["🌊","🐟","🐠","🐡","🦑","🦀","🐚","⚓","🛥️","⛵","🪸","🐬","🐳","🦈","🏝️","🌅","🪼","🐋","🦭","🐙","🌴","🏖️","🌏","🧭"];
+let selectedMarker = marineIcons[0];
 
-const map=L.map("map",{worldCopyJump:true,minZoom:2,maxZoom:10}).setView([20,0],2);
+const grid = document.getElementById("markerGrid");
 
-L.tileLayer("https://services.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}").addTo(map);
+marineIcons.forEach(icon=>{
 
-const seaCluster=L.markerClusterGroup();
-const homeLayer=L.layerGroup();
-const lineLayer=L.layerGroup();
+let el = document.createElement("div");
+el.className = "markerOption";
+el.innerText = icon;
 
-map.addLayer(seaCluster);
-map.addLayer(homeLayer);
-map.addLayer(lineLayer);
+el.onclick = ()=>{
+selectedMarker = icon;
+document.querySelectorAll(".markerOption").forEach(o=>o.classList.remove("selected"));
+el.classList.add("selected");
+};
 
-let connectionsVisible=true;
-const toggleBtn=document.getElementById("toggleConnections");
+grid.appendChild(el);
 
-toggleBtn.onclick=function(){
-connectionsVisible=!connectionsVisible;
+});
+
+grid.children[0].classList.add("selected");
+
+const map = L.map("map",{minZoom:2,maxZoom:10}).setView([20,0],2);
+
+/* ORIGINAL OCEAN BASEMAP (unchanged) */
+L.tileLayer(
+"https://services.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}",
+{maxZoom:10}
+).addTo(map);
+
+/* SAFE CITY LABEL OVERLAY */
+map.createPane('labels');
+map.getPane('labels').style.zIndex = 650;
+map.getPane('labels').style.pointerEvents = 'none';
+
+L.tileLayer(
+"https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
+{maxZoom:10,pane:'labels'}
+).addTo(map);
+
+const homeLayer = L.layerGroup().addTo(map);
+const lineLayer = L.layerGroup().addTo(map);
+const seaLayer = L.layerGroup().addTo(map);
+
+let connectionsVisible = true;
+
+const toggle = document.getElementById("toggleConnections");
+L.DomEvent.disableClickPropagation(toggle);
+
+toggle.onclick = function(){
+connectionsVisible = !connectionsVisible;
+
 if(connectionsVisible){
 map.addLayer(homeLayer);
 map.addLayer(lineLayer);
-toggleBtn.innerText="Hide connections";
+this.innerText="Hide connections";
 }else{
 map.removeLayer(homeLayer);
 map.removeLayer(lineLayer);
-toggleBtn.innerText="Show connections";
+this.innerText="Show connections";
 }
+
 };
 
-let step=0;
-let homeLatLng=null;
-let seaLatLng=null;
-let homeMarker=null;
-let seaMarker=null;
-let connectionLine=null;
-
-const mapHint=document.getElementById("mapHint");
-const submitBtn=document.getElementById("submitBtn");
-
-const step1=document.getElementById("step1");
-const step2=document.getElementById("step2");
-const step3=document.getElementById("step3");
+let step = 0;
+let homeLatLng = null;
 
 function emojiMarker(icon){
 return L.divIcon({
@@ -184,131 +198,48 @@ iconAnchor:[15,15]
 }
 
 function updateSteps(){
-step1.className="step";
-step2.className="step";
-step3.className="step";
 
-if(step===0) step1.className="step active";
-if(step===1){ step1.className="step done"; step2.className="step active"; }
-if(step===2){ step1.className="step done"; step2.className="step done"; step3.className="step active"; }
-}
+const s1=document.getElementById("step1");
+const s2=document.getElementById("step2");
+const s3=document.getElementById("step3");
 
-function resetMap(){
+s1.className="step";
+s2.className="step";
+s3.className="step";
 
-step=0;
-updateSteps();
+if(step===0) s1.className="step active";
+if(step===1){s1.className="step done"; s2.className="step active";}
+if(step===2){s1.className="step done"; s2.className="step done"; s3.className="step active";}
 
-homeLatLng=null;
-seaLatLng=null;
-
-if(homeMarker) homeLayer.removeLayer(homeMarker);
-if(seaMarker) seaCluster.removeLayer(seaMarker);
-if(connectionLine) lineLayer.removeLayer(connectionLine);
-
-homeMarker=null;
-seaMarker=null;
-connectionLine=null;
-
-submitBtn.disabled=true;
-mapHint.innerText="Click where you live";
 }
 
 map.on("click",function(e){
 
 if(step===0){
 homeLatLng=e.latlng;
-homeMarker=L.marker(e.latlng,{icon:emojiMarker("🏠")}).addTo(homeLayer);
-mapHint.innerText="Now click the ocean place you love";
+L.marker(e.latlng,{icon:emojiMarker("🏠")}).addTo(homeLayer);
+document.getElementById("mapHint").innerText="Now click the ocean place you love";
 step=1;
 updateSteps();
 return;
 }
 
 if(step===1){
-seaLatLng=e.latlng;
-seaMarker=L.marker(e.latlng,{icon:emojiMarker("🌊")}).addTo(seaCluster);
-
-connectionLine=L.polyline([homeLatLng,seaLatLng],{
-color:"#0078bd",dashArray:"10 10"
-}).addTo(lineLayer);
-
-submitBtn.disabled=false;
-mapHint.innerText="Tell your story and share it";
-
+L.marker(e.latlng,{icon:emojiMarker(selectedMarker)}).addTo(seaLayer);
+L.polyline([homeLatLng,e.latlng],{color:"#0078bd",dashArray:"10 10"}).addTo(lineLayer);
+document.getElementById("submitBtn").disabled=false;
+document.getElementById("mapHint").innerText="Tell your story and share it";
 step=2;
 updateSteps();
 }
-});
-
-async function uploadPhoto(file){
-const fileName=Date.now()+"_"+file.name;
-const {error}=await supabaseClient.storage.from("mpa-day-sea-photos").upload(fileName,file);
-if(error){console.error(error);return null;}
-const {data}=supabaseClient.storage.from("mpa-day-sea-photos").getPublicUrl(fileName);
-return data.publicUrl;
-}
-
-async function loadEntries(){
-
-const {data}=await supabaseClient.from("sea_connections").select("*").order("created_at",{ascending:false});
-const entries=document.getElementById("entries");
-entries.innerHTML="";
-
-data.forEach(function(d){
-
-const sea=[d.sea_lat,d.sea_lng];
-const home=[d.home_lat,d.home_lng];
-
-const marker=L.marker(sea,{icon:emojiMarker("🌊")}).addTo(seaCluster);
-
-L.polyline([home,sea],{color:"#1c7ed6",dashArray:"6 6",opacity:0.6}).addTo(lineLayer);
-
-let popup="<b>"+(d.name||"Anonymous")+"</b><br>"+(d.note||"");
-if(d.photo_url) popup+="<br><img src='"+d.photo_url+"' style='max-width:200px'>";
-
-marker.bindPopup(popup);
-
-const card=document.createElement("div");
-card.className="story-card";
-card.innerHTML="<b>"+(d.name||"Anonymous")+"</b><br>"+(d.note||"");
-
-card.onclick=function(){
-map.flyTo(sea,6);
-marker.openPopup();
-};
-
-entries.appendChild(card);
 
 });
-}
 
-async function saveEntry(){
-
-let photoURL=null;
-const photoInput=document.getElementById("photo");
-if(photoInput.files.length>0){
-photoURL=await uploadPhoto(photoInput.files[0]);
-}
-
-const entry={
-name:document.getElementById("name").value,
-home_place:document.getElementById("home_place").value,
-sea_place:document.getElementById("sea_place").value,
-note:document.getElementById("note").value,
-style:0,
-photo_url:photoURL,
-home_lat:homeLatLng.lat,
-home_lng:homeLatLng.lng,
-sea_lat:seaLatLng.lat,
-sea_lng:seaLatLng.lng
-};
-
-await supabaseClient.from("sea_connections").insert([entry]);
+function resetMap(){
 location.reload();
 }
 
 updateSteps();
-loadEntries();
 
 </script>
 
