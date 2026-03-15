@@ -171,6 +171,18 @@ const submitBtn=document.getElementById("submitBtn");
 const mapHint=document.getElementById("mapHint");
 const steps=document.querySelectorAll(".step");
 
+const markerSounds = {
+  "🐧": "penguin.mp3.mp3"
+};
+
+  function playMarkerSound(marker){
+  const file = markerSounds[marker];
+  if(!file) return;
+
+  const sound = new Audio(file);
+  sound.volume = 0.4;
+  sound.play();
+}  
 const marineIcons=[
 {icon:"🌊",name:"Ocean wave"},{icon:"🐟",name:"Fish"},{icon:"🦆",name:"Duck"},
 {icon:"🐡",name:"Pufferfish"},{icon:"🦑",name:"Squid"},{icon:"🦀",name:"Crab"},
@@ -191,7 +203,7 @@ marineIcons.forEach((item,i)=>{
  el.textContent=item.icon;
  el.title=item.name;
 
- el.onclick=()=>{
+el.onclick=()=>{
 
   styleInput.value=i;
 
@@ -200,7 +212,10 @@ marineIcons.forEach((item,i)=>{
 
   el.classList.add("selected");
 
- };
+  // 🔊 play sound for this marker
+  playMarkerSound(item.icon);
+
+};
 
  markerGrid.appendChild(el);
 
