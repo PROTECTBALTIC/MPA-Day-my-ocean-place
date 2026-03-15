@@ -1,115 +1,130 @@
 
+
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>My Ocean Place</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>My Ocean Place – Step UI Restored</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
-<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
-<link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"/>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-* {
-  box-sizing: border-box;
-}
-body{margin:0;font-family:'Inter',sans-serif;display:flex;height:100vh;background:linear-gradient(180deg,#a1e8df,#38b7e5);} 
-#map{flex:1; position:relative;} 
-#panel{width:380px;padding:22px;background:white;overflow:auto;box-shadow:0 0 30px rgba(0,0,0,0.15);z-index:1000;} 
+*{box-sizing:border-box}
 
-h2{margin-top:0;color:#004470;font-weight:700}
+body{
+margin:0;
+font-family:'Inter',sans-serif;
+display:flex;
+height:100vh;
+background:linear-gradient(180deg,#c6f3ee,#4ec2ec);
+overflow:hidden;
+}
+
+#map{
+flex:1;
+position:relative;
+}
+
+#panel{
+width:380px;
+background:white;
+padding:22px;
+overflow:auto;
+box-shadow:0 0 25px rgba(0,0,0,0.2);
+}
+
+h2{margin-top:0;color:#004470}
 .subtitle{font-size:14px;color:#555;margin-bottom:15px}
 
-.instructions{margin:16px 0 22px 0;font-size:14px;position:relative;padding-left:6px}
-.instructions::before{content:"";position:absolute;left:17px;top:6px;bottom:6px;width:2px;background:#dee2e6}
+.instructions{margin:16px 0 22px 0;font-size:14px}
 
-.step-row{display:flex;align-items:center;margin-bottom:14px;position:relative}
+.step-row{display:flex;align-items:center;margin-bottom:12px}
 
-.step{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;margin-right:12px;background:#e9ecef;color:#495057;border:2px solid white;box-shadow:0 0 0 2px #dee2e6;z-index:2}
-.step.active{background:#0078bd;color:white;box-shadow:0 0 0 2px #0078bd}
-.step.done{background:#a1e3b8;color:white;box-shadow:0 0 0 2px #a1e3b8}
-.step-text{line-height:1.35;color:#333}
+.step{
+width:26px;height:26px;border-radius:50%;
+display:flex;align-items:center;justify-content:center;
+font-weight:600;font-size:13px;margin-right:10px;
+background:#e9ecef;
+}
 
-input,textarea,select,button{width:100%;margin-bottom:12px;padding:10px;border-radius:8px;border:1px solid #ddd;font-family:inherit;font-size:14px}
-textarea{min-height:80px;resize:vertical}
+.step.active{background:#0078bd;color:white}
+.step.done{background:#7dd3a6;color:white}
 
-button{background:#0078bd;color:white; border:none;font-weight:600;cursor:pointer}
-button:disabled{background:#adb5bd}
+input,textarea,select,button{
+width:100%;padding:10px;border-radius:8px;border:1px solid #ddd;
+margin-bottom:10px;font-family:inherit;
+}
+
+button{background:#0078bd;color:white;font-weight:600;border:none;cursor:pointer}
 .secondary{background:#dee2e6;color:#333}
 
-.story-card{border-bottom:1px solid #eee;padding:10px 0;font-size:14px}
-.story-card img{width:100%;max-width:100%;height:auto;border-radius:8px;margin-top:6px;display:block}
-.leaflet-popup-content img{max-width:100%;height:auto;border-radius:8px;display:block;margin-top:6px}
+.clean-marker{background:none;border:none}
 
-#preview{width:100%;border-radius:8px;display:none;margin-bottom:12px}
+.story-card{padding:10px;border-bottom:1px solid #eee;cursor:pointer}
+.story-card:hover{background:#f2fbff}
 
-#mapHint{position:absolute;left:50%;bottom:25px;transform:translateX(-50%);background:rgba(255,255,255,0.95);padding:10px 16px;border-radius:20px;box-shadow:0 6px 18px rgba(0,0,0,0.15);font-size:14px;color:#004470;background:white;font-weight:500;pointer-events:none;z-index:500}
-
-.leaflet-control-layers{background:white;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,0.15);border:none;font-family:'Inter',sans-serif;padding:6px 8px}
-
-@media (max-width:800px){body{flex-direction:column;height:auto}#panel{width:100%;box-shadow:none;border-bottom:1px solid #eee}#map{height:60vh}}
-
-  .logo{
-height:80px;
-vertical-align:middle;
-margin-right:10px;
+#mapHint{
+position:absolute;left:50%;bottom:25px;transform:translateX(-50%);
+background:white;padding:10px 16px;border-radius:20px;
+box-shadow:0 6px 18px rgba(0,0,0,0.15);
+font-size:14px;color:#004470;pointer-events:none;z-index:1000;
 }
 
-.title{
-display:flex;
-align-items:center;
-gap:10px;
+.layerToggle{
+position:absolute;top:15px;right:15px;background:white;
+padding:8px 12px;border-radius:8px;
+box-shadow:0 4px 10px rgba(0,0,0,0.2);
+font-size:13px;cursor:pointer;z-index:1000;
 }
-  
 </style>
 </head>
+
 <body>
 
 <div id="panel">
-<h2 class="title">
-<img src="MPADay_Logo_blue_transp.png" class="logo">
-My Ocean Place
-</h2>
-<div class="subtitle">The ocean is full of places worth protecting.<b>Tell us yours.</b></div>
+
+<h2>🌊 My Ocean Place</h2>
+<div class="subtitle">The ocean is full of places worth protecting. Tell us yours.</div>
 
 <div class="instructions">
-<div class="step-row"><span class="step active">1</span><span class="step-text">Click where you're from</span></div>
-<div class="step-row"><span class="step">2</span><span class="step-text">Click the ocean place you love</span></div>
-<div class="step-row"><span class="step">3</span><span class="step-text">Tell us why it matters to you</span></div>
+<div class="step-row"><span class="step active" id="step1">1</span>Click where you're from</div>
+<div class="step-row"><span class="step" id="step2">2</span>Click the ocean place you love</div>
+<div class="step-row"><span class="step" id="step3">3</span>Tell us why it matters</div>
 </div>
 
 <input id="name" placeholder="Your name (optional)">
-<input id="home_place" placeholder="Your home city or place" required>
-<input id="sea_place" placeholder="Name of your favourite ocean place" required>
-<textarea id="note" placeholder="Why is this place meaningful to you?"></textarea>
+<input id="home_place" placeholder="Your home city">
+<input id="sea_place" placeholder="Ocean place you love">
 
-<label>Upload a photo (File size: 400 KB max.)</label>
-<input type="file" id="photo" accept="image/*">
-<img id="preview">
+<textarea id="note" placeholder="Why is this place meaningful?"></textarea>
 
-<label>Choose your favourite marine marker</label>
+<label>Upload photo</label>
+<input type="file" id="photo">
+
 <select id="style"></select>
 
-<button id="submitBtn" onclick="saveEntry()" disabled>Share your ocean story</button>
-<button class="secondary" onclick="clearSelections()">Reset markers</button>
+<button id="submitBtn" onclick="saveEntry()" disabled>Share story</button>
+<button class="secondary" onclick="resetMap()">Reset markers</button>
 
-<h3>Recent stories</h3>
+<h3>Stories</h3>
 <div id="entries"></div>
+
 </div>
 
 <div id="map">
-<div id="mapHint">Click the map to mark where you are from</div>
+<div id="mapHint">Click where you live</div>
+<div id="toggleConnections" class="layerToggle">Hide connections</div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
-<script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 
 <script>
 
@@ -117,36 +132,9 @@ const SUPABASE_URL="https://yuifiafsiuuiqtdkxgii.supabase.co";
 const SUPABASE_KEY="sb_publishable_M7fp8R7B9kQZemV-sFwcIw_zEIN3Y_t";
 const supabaseClient=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
-const entriesEl=document.getElementById("entries");
-const submitBtn=document.getElementById("submitBtn");
-const mapHint=document.getElementById("mapHint");
-const steps=document.querySelectorAll(".step");
+const map=L.map("map",{worldCopyJump:true,minZoom:2,maxZoom:10}).setView([20,0],2);
 
-const marineIcons=[
-{icon:"🌊",name:"Ocean wave"},{icon:"🐟",name:"Fish"},{icon:"🐠",name:"Tropical fish"},
-{icon:"🐡",name:"Pufferfish"},{icon:"🦑",name:"Squid"},{icon:"🦀",name:"Crab"},
-{icon:"🐚",name:"Seashell"},{icon:"⚓",name:"Anchor"},{icon:"🛥️",name:"Motor boat"},
-{icon:"⛵",name:"Sailboat"},{icon:"🪸",name:"Coral"},{icon:"🐬",name:"Dolphin"},
-{icon:"🐳",name:"Whale"},{icon:"🦈",name:"Shark"},{icon:"🏝️",name:"Island"},
-{icon:"🌅",name:"Sea sunset"},{icon:"🪼",name:"Jellyfish"},{icon:"🐋",name:"Blue whale"},
-{icon:"🦭",name:"Seal"},{icon:"🐙",name:"Octopus"}];
-
-const styleSelect=document.getElementById("style");
-marineIcons.forEach((item,i)=>{
- const opt=document.createElement("option");
- opt.value=i;
- opt.textContent=`${item.icon} ${item.name}`;
- styleSelect.appendChild(opt);
-});
-
-const map=L.map("map",{worldCopyJump:true,maxZoom:10,minZoom:2}).setView([55,10],3);
-
-L.Control.geocoder({defaultMarkGeocode:false,position:"topleft",placeholder:"Search for a location"})
-.on("markgeocode",e=>map.setView(e.geocode.center,8))
-.addTo(map);
-
-L.tileLayer("https://services.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}",{maxZoom:10}).addTo(map);
-L.tileLayer("https://services.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Reference/MapServer/tile/{z}/{y}/{x}",{maxZoom:10}).addTo(map);
+L.tileLayer("https://services.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}").addTo(map);
 
 const seaCluster=L.markerClusterGroup();
 const homeLayer=L.layerGroup();
@@ -156,189 +144,171 @@ map.addLayer(seaCluster);
 map.addLayer(homeLayer);
 map.addLayer(lineLayer);
 
-L.control.layers({
-"Connections":L.layerGroup([seaCluster,homeLayer,lineLayer]),
-"Favourite sea places":seaCluster
-}).addTo(map);
+let connectionsVisible=true;
+const toggleBtn=document.getElementById("toggleConnections");
 
+toggleBtn.onclick=function(){
+connectionsVisible=!connectionsVisible;
+if(connectionsVisible){
+map.addLayer(homeLayer);
+map.addLayer(lineLayer);
+toggleBtn.innerText="Hide connections";
+}else{
+map.removeLayer(homeLayer);
+map.removeLayer(lineLayer);
+toggleBtn.innerText="Show connections";
+}
+};
+
+let step=0;
 let homeLatLng=null;
 let seaLatLng=null;
 let homeMarker=null;
 let seaMarker=null;
 let connectionLine=null;
 
-function updateStepUI(){
- if(homeLatLng && !seaLatLng){
-  steps[0].classList.add("done");
-  steps[0].classList.remove("active");
-  steps[1].classList.add("active");
-  mapHint.innerText="Now click your favourite sea place";
- }
- if(homeLatLng && seaLatLng){
-  steps[1].classList.add("done");
-  steps[1].classList.remove("active");
-  steps[2].classList.add("active");
-  mapHint.innerText="Tell your story and share it";
- }
+const mapHint=document.getElementById("mapHint");
+const submitBtn=document.getElementById("submitBtn");
+
+const step1=document.getElementById("step1");
+const step2=document.getElementById("step2");
+const step3=document.getElementById("step3");
+
+function emojiMarker(icon){
+return L.divIcon({
+html:"<div style='font-size:28px'>"+icon+"</div>",
+className:"clean-marker",
+iconSize:[30,30],
+iconAnchor:[15,15]
+});
 }
 
-function clearSelections(){
- homeLatLng=null;
- seaLatLng=null;
- if(homeMarker){map.removeLayer(homeMarker);homeMarker=null}
- if(seaMarker){map.removeLayer(seaMarker);seaMarker=null}
- if(connectionLine){lineLayer.removeLayer(connectionLine);connectionLine=null}
- steps.forEach(s=>s.classList.remove("done","active"));
- steps[0].classList.add("active");
- submitBtn.disabled=true;
- mapHint.innerText="Click the map where you live";
+function updateSteps(){
+step1.className="step";
+step2.className="step";
+step3.className="step";
+
+if(step===0) step1.className="step active";
+if(step===1){ step1.className="step done"; step2.className="step active"; }
+if(step===2){ step1.className="step done"; step2.className="step done"; step3.className="step active"; }
 }
 
-map.on("click",e=>{
+function resetMap(){
 
- if(!homeLatLng){
-  homeLatLng=e.latlng;
-  homeMarker=L.marker(e.latlng,{draggable:true}).addTo(homeLayer);
-  homeMarker.on("dragend",()=>{
-   homeLatLng=homeMarker.getLatLng();
-   updateLine();
-  });
-  updateStepUI();
-  return;
- }
+step=0;
+updateSteps();
 
- if(!seaLatLng){
-  seaLatLng=e.latlng;
-  seaMarker=L.marker(e.latlng,{draggable:true}).addTo(seaCluster);
-  seaMarker.on("dragend",()=>{
-   seaLatLng=seaMarker.getLatLng();
-   updateLine();
-  });
-  updateLine();
-  updateStepUI();
- }
+homeLatLng=null;
+seaLatLng=null;
 
+if(homeMarker) homeLayer.removeLayer(homeMarker);
+if(seaMarker) seaCluster.removeLayer(seaMarker);
+if(connectionLine) lineLayer.removeLayer(connectionLine);
+
+homeMarker=null;
+seaMarker=null;
+connectionLine=null;
+
+submitBtn.disabled=true;
+mapHint.innerText="Click where you live";
+}
+
+map.on("click",function(e){
+
+if(step===0){
+homeLatLng=e.latlng;
+homeMarker=L.marker(e.latlng,{icon:emojiMarker("🏠")}).addTo(homeLayer);
+mapHint.innerText="Now click the ocean place you love";
+step=1;
+updateSteps();
+return;
+}
+
+if(step===1){
+seaLatLng=e.latlng;
+seaMarker=L.marker(e.latlng,{icon:emojiMarker("🌊")}).addTo(seaCluster);
+
+connectionLine=L.polyline([homeLatLng,seaLatLng],{
+color:"#0078bd",dashArray:"10 10"
+}).addTo(lineLayer);
+
+submitBtn.disabled=false;
+mapHint.innerText="Tell your story and share it";
+
+step=2;
+updateSteps();
+}
 });
 
-function updateLine(){
-
- if(homeLatLng && seaLatLng){
-
-  if(connectionLine){
-   lineLayer.removeLayer(connectionLine);
-  }
-
-  connectionLine = L.polyline([
-   [homeLatLng.lat,homeLatLng.lng],
-   [seaLatLng.lat,seaLatLng.lng]
-  ],{
-   color:"#0078bd",
-   weight:4,
-   opacity:0.9,
-   dashArray:"10 10"
-  });
-
-  lineLayer.addLayer(connectionLine);
-
-  /* ocean current animation */
-  let offset = 0;
-
-  setInterval(()=>{
-   offset = (offset + 0.4) % 20;
-   connectionLine.setStyle({
-    dashOffset: offset
-   });
-  },200);
-
-  submitBtn.disabled = false;
-
- }
-
-}
-
-document.getElementById("photo").onchange=e=>{
- const reader=new FileReader();
- reader.onload=()=>{
-  const img=document.getElementById("preview");
-  img.src=reader.result;
-  img.style.display="block";
- };
- reader.readAsDataURL(e.target.files[0]);
-};
-
-/* NEW PHOTO UPLOAD FUNCTION */
 async function uploadPhoto(file){
- const fileName=Date.now()+"_"+file.name;
- const {error}=await supabaseClient.storage.from("mpa-day-sea-photos").upload(fileName,file);
- if(error){
-  console.error("Upload error",error);
-  return null;
- }
- const {data}=supabaseClient.storage.from("mpa-day-sea-photos").getPublicUrl(fileName);
- return data.publicUrl;
+const fileName=Date.now()+"_"+file.name;
+const {error}=await supabaseClient.storage.from("mpa-day-sea-photos").upload(fileName,file);
+if(error){console.error(error);return null;}
+const {data}=supabaseClient.storage.from("mpa-day-sea-photos").getPublicUrl(fileName);
+return data.publicUrl;
 }
 
 async function loadEntries(){
- const {data,error}=await supabaseClient.from("sea_connections").select("*").order("created_at",{ascending:false});
- if(error){console.error(error);return;}
- entriesEl.innerHTML="";
- data.forEach(d=>{
-  const home=[d.home_lat,d.home_lng];
-  const sea=[d.sea_lat,d.sea_lng];
-  const icon=L.divIcon({html:`<div style="font-size:28px">${marineIcons[d.style]?.icon||"🌊"}</div>`,className:""});
-  L.circleMarker(home,{radius:5,color:"#339af0"}).addTo(homeLayer);
-  const seaMarker=L.marker(sea,{icon}).addTo(seaCluster);
-  L.polyline([home,sea],{color:"#1c7ed6",weight:3,opacity:0.6,dashArray:"8 8"}).addTo(lineLayer);
-  let popup=`<b>${d.name||"Anonymous"}</b>`;
-  if(d.home_place) popup+=`<br>Home: ${d.home_place}`;
-  if(d.sea_place) popup+=`<br>Sea place: ${d.sea_place}`;
-  popup+=`<br>${d.note||""}`;
-  if(d.photo_url) popup+=`<br><img src="${d.photo_url}">`;
-  seaMarker.bindPopup(popup);
-  const card=document.createElement("div");
-  card.className="story-card";
-  card.innerHTML=`<b>${marineIcons[d.style]?.icon||"🌊"} ${d.name||"Anonymous"}</b><br>${d.note||""}${d.photo_url?`<img src="${d.photo_url}">`:""}`;
-  entriesEl.appendChild(card);
- });
+
+const {data}=await supabaseClient.from("sea_connections").select("*").order("created_at",{ascending:false});
+const entries=document.getElementById("entries");
+entries.innerHTML="";
+
+data.forEach(function(d){
+
+const sea=[d.sea_lat,d.sea_lng];
+const home=[d.home_lat,d.home_lng];
+
+const marker=L.marker(sea,{icon:emojiMarker("🌊")}).addTo(seaCluster);
+
+L.polyline([home,sea],{color:"#1c7ed6",dashArray:"6 6",opacity:0.6}).addTo(lineLayer);
+
+let popup="<b>"+(d.name||"Anonymous")+"</b><br>"+(d.note||"");
+if(d.photo_url) popup+="<br><img src='"+d.photo_url+"' style='max-width:200px'>";
+
+marker.bindPopup(popup);
+
+const card=document.createElement("div");
+card.className="story-card";
+card.innerHTML="<b>"+(d.name||"Anonymous")+"</b><br>"+(d.note||"");
+
+card.onclick=function(){
+map.flyTo(sea,6);
+marker.openPopup();
+};
+
+entries.appendChild(card);
+
+});
 }
 
-/* UPDATED SAVE ENTRY */
 async function saveEntry(){
- if(!homeLatLng || !seaLatLng){
-  alert("Please select both locations");
-  return;
- }
- let photoURL=null;
- const photoInput=document.getElementById("photo");
- if(photoInput.files.length>0){
-  photoURL=await uploadPhoto(photoInput.files[0]);
- }
- const entry={
-  name:document.getElementById("name").value,
-  home_place:document.getElementById("home_place").value,
-  sea_place:document.getElementById("sea_place").value,
-  note:document.getElementById("note").value,
-  style:parseInt(document.getElementById("style").value),
-  photo_url:photoURL,
-  home_lat:homeLatLng.lat,
-  home_lng:homeLatLng.lng,
-  sea_lat:seaLatLng.lat,
-  sea_lng:seaLatLng.lng
- };
- const {error}=await supabaseClient.from("sea_connections").insert([entry]);
- if(error){
-  console.error(error);
-  alert("Error saving entry");
-  return;
- }
- location.reload();
+
+let photoURL=null;
+const photoInput=document.getElementById("photo");
+if(photoInput.files.length>0){
+photoURL=await uploadPhoto(photoInput.files[0]);
 }
 
-async function init(){
- await loadEntries();
+const entry={
+name:document.getElementById("name").value,
+home_place:document.getElementById("home_place").value,
+sea_place:document.getElementById("sea_place").value,
+note:document.getElementById("note").value,
+style:0,
+photo_url:photoURL,
+home_lat:homeLatLng.lat,
+home_lng:homeLatLng.lng,
+sea_lat:seaLatLng.lat,
+sea_lng:seaLatLng.lng
+};
+
+await supabaseClient.from("sea_connections").insert([entry]);
+location.reload();
 }
 
-init();
+updateSteps();
+loadEntries();
 
 </script>
 
