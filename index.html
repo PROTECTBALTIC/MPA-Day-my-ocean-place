@@ -66,7 +66,28 @@ display:flex;
 align-items:center;
 gap:10px;
 }
-  
+
+#markerGrid{
+display:grid;
+grid-template-columns:repeat(6,1fr);
+gap:6px;
+margin-bottom:12px;
+}
+
+.markerOption{
+font-size:24px;
+text-align:center;
+cursor:pointer;
+padding:6px;
+border-radius:6px;
+border:2px solid transparent;
+}
+
+.markerOption.selected{
+border-color:#0078bd;
+background:#e7f4ff;
+}
+ 
 </style>
 </head>
 <body>
@@ -94,7 +115,8 @@ My Ocean Place
 <img id="preview">
 
 <label>Choose your favourite marine marker</label>
-<select id="style"></select>
+<div id="markerGrid"></div>
+<input type="hidden" id="style" value="0">
 
 <button id="submitBtn" onclick="saveEntry()" disabled>Share your ocean story</button>
 <button class="secondary" onclick="clearSelections()">Reset markers</button>
@@ -129,15 +151,37 @@ const marineIcons=[
 {icon:"⛵",name:"Sailboat"},{icon:"🪸",name:"Coral"},{icon:"🐬",name:"Dolphin"},
 {icon:"🐳",name:"Whale"},{icon:"🦈",name:"Shark"},{icon:"🏝️",name:"Island"},
 {icon:"🌅",name:"Sea sunset"},{icon:"🪼",name:"Jellyfish"},{icon:"🐋",name:"Blue whale"},
-{icon:"🦭",name:"Seal"},{icon:"🐙",name:"Octopus"}];
+{icon:"🦭",name:"Seal"},{icon:"🐙",name:"Octopus"},{icon:"🦐",name:"Shrimp"},
+{icon:"🌿",name:"Kelp"},{icon:"🫧",name:"Bubble"},{icon:"🦞",name:"Lobster"}];
 
-const styleSelect=document.getElementById("style");
+const markerGrid=document.getElementById("markerGrid");
+const styleInput=document.getElementById("style");
+
 marineIcons.forEach((item,i)=>{
- const opt=document.createElement("option");
- opt.value=i;
- opt.textContent=`${item.icon} ${item.name}`;
- styleSelect.appendChild(opt);
+
+ const el=document.createElement("div");
+ el.className="markerOption";
+ el.textContent=item.icon;
+ el.title=item.name;
+
+ el.onclick=()=>{
+
+  styleInput.value=i;
+
+  document.querySelectorAll(".markerOption")
+  .forEach(o=>o.classList.remove("selected"));
+
+  el.classList.add("selected");
+
+ };
+
+ markerGrid.appendChild(el);
+
 });
+
+/* default selection */
+markerGrid.children[0].classList.add("selected");
+styleInput.value=0;
 
 const map=L.map("map",{worldCopyJump:true,maxZoom:10,minZoom:2}).setView([55,10],3);
 
