@@ -170,11 +170,11 @@ My Ocean Place
 </div>
 
 <input id="name" placeholder="Your name (optional)">
-<input id="home_place" placeholder="Your home city or place" required>
-<input id="sea_place" placeholder="Your favourite ocean place" required>
-<textarea id="note" placeholder="Why is the place meaningful to you?"></textarea>
+<input id="home_place" placeholder="Your home city or place (optional)" required>
+<input id="sea_place" placeholder="Your favourite ocean place (optional)" required>
+<textarea id="note" placeholder="Why is the place meaningful to you? (optional)"></textarea>
 
-<label>Upload a photo (File size: 400 KB max.)</label>
+<label>Upload a photo (400 KB max. - photo will not display if larger)</label>
 <input type="file" id="photo" accept="image/*">
 <img id="preview">
 
@@ -182,7 +182,7 @@ My Ocean Place
 <div id="markerGrid"></div>
 <input type="hidden" id="style" value="0">
 
-<button id="submitBtn" onclick="saveEntry()" disabled>Share your ocean story</button>
+<button id="submitBtn" onclick="saveEntry()" disabled>Save</button>
 <button class="secondary" onclick="clearSelections()">Reset markers</button>
 
 <h3>Recent stories</h3>
