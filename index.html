@@ -132,7 +132,7 @@ background:#e7f4ff;
 #projectCredits img{
  height:32px;
  width:auto;
- flex-shrink:0;
+ max-width:100%;
 }
 
 #projectCredits .logoRow{
@@ -145,14 +145,29 @@ background:#e7f4ff;
 
 @media (max-width:800px){
  #projectCredits{
-  position:absolute;
-  bottom:15px;
+  position:fixed;
+  bottom:10px;
   left:50%;
   transform:translateX(-50%);
   right:auto;
    top:auto;
-  max-width:90%;
+  max-width:92%;
+   z-index:1000;
  }
+}
+
+  @media (max-width:800px){
+
+ #projectCredits .logoRow{
+  justify-content:center;
+  gap:6px;
+ }
+
+ #projectCredits img{
+  height:24px;
+  max-width:30%;
+ }
+
 }
 
 </style>
