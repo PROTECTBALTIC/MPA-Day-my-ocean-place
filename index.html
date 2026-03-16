@@ -114,7 +114,40 @@ border:2px solid transparent;
 border-color:#0078bd;
 background:#e7f4ff;
 }
- 
+
+#projectCredits{
+ position:absolute;
+ right:15px;
+ bottom:15px;
+ background:white;
+ padding:10px 14px;
+ border-radius:10px;
+ box-shadow:0 6px 18px rgba(0,0,0,0.15);
+ font-size:12px;
+ color:#333;
+ z-index:600;
+ max-width:260px;
+}
+
+#projectCredits img{
+ height:36px;
+ margin-right:8px;
+ vertical-align:middle;
+}
+
+#projectCredits .logoRow{
+ margin-bottom:6px;
+}
+
+@media (max-width:800px){
+ #projectCredits{
+  position:relative;
+  right:auto;
+  bottom:auto;
+  margin-top:10px;
+ }
+}
+
 </style>
 </head>
 <body>
@@ -153,7 +186,24 @@ My Ocean Place
 </div>
 
 <div id="map">
-<div id="mapHint">Click the map to mark where you are from</div>
+ <div id="mapHint">Click the map to mark where you are from</div>
+
+ <!-- Project credits -->
+ <div id="projectCredits">
+
+  <div class="logoRow">
+   <img src="protect-baltic-logo.png">
+   <img src="helcom-logo.png">
+   <img src="eu-logo.png">
+  </div>
+
+  <div>
+   The development of this website’s content was co-funded by the European Union
+   through the <b>PROTECT BALTIC</b> project.
+  </div>
+
+ </div>
+
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
