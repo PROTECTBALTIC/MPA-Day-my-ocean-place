@@ -436,6 +436,18 @@ map.on("click",e=>{
 
 });
 
+map.on('popupopen', function(e){
+  const popup = e.popup;
+
+  const imgs = popup._contentNode.querySelectorAll('img');
+
+  imgs.forEach(img => {
+    img.onload = () => {
+      popup.update();
+    };
+  });
+});
+  
 function updateLine(){
 
  if(homeLatLng && seaLatLng){
