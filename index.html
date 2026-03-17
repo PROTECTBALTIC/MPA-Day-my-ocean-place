@@ -84,10 +84,15 @@ button:disabled{background:#adb5bd}
     max-width: 85%;
     text-align: center;
 
+    height: fit-content !important;
+    min-height: 0 !important;
+    max-height: none !important;
+
     display: inline-block;
-    height: auto;
-    min-height: unset;
     line-height: 1.3;
+
+    /* remove any weird stretching */
+    box-sizing: border-box;
   }
 
 }
