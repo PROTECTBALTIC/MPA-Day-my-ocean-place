@@ -116,57 +116,61 @@ background:#e7f4ff;
 }
 
 #projectCredits{
- position:fixed;
- right:15px;
- bottom:15px;
- background:white;
- padding:10px 14px;
- border-radius:10px;
- box-shadow:0 6px 18px rgba(0,0,0,0.15);
- font-size:12px;
- color:#333;
- z-index:600;
- max-width:400px;
+  position: fixed;
+  right: 15px;
+  bottom: 15px;
+  background: white;
+  padding: 10px 14px;
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+  font-size: 12px;
+  color: #333;
+  z-index: 1000; /* ensure it's above map */
+  max-width: 400px;
 }
 
 #projectCredits img{
- height:32px;
- width:auto;
- max-width:100%;
+  height:32px;
+  width:auto;
+  max-width:100%;
 }
 
 #projectCredits .logoRow{
- display:flex;
- align-items:center;
- gap:8px;
- flex-wrap:nowrap;
- margin-bottom:6px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:nowrap;
+  margin-bottom:6px;
 }
 
 @media (max-width:800px){
- #projectCredits{
-  position:fixed;
-  bottom:10px;
-  left:50%;
-  transform:translateX(-50%);
-  right:auto;
-   top:auto;
-  max-width:92%;
-   z-index:1000;
- }
-}
 
-  @media (max-width:800px){
+  #projectCredits{
+    position: fixed;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    right: auto;
+    top: auto;
+    width: auto;
+    max-width: 92%;
+    z-index: 1000;
+  }
 
- #projectCredits .logoRow{
-  justify-content:center;
-  gap:6px;
- }
+  #projectCredits .logoRow{
+    justify-content:center;
+    gap:6px;
+  }
 
- #projectCredits img{
-  height:24px;
-  max-width:30%;
- }
+  #projectCredits img{
+    height:24px;
+    max-width:30%;
+  }
+
+  /* keep hint above credits */
+  #mapHint{
+    bottom: 100px;
+  }
 
 }
 
@@ -209,21 +213,20 @@ My Ocean Place
 
 <div id="map">
  <div id="mapHint">Click the map to mark where you are from</div>
+</div>
 
- <!-- Project credits -->
- <div id="projectCredits">
+<!-- Project credits -->
+<div id="projectCredits">
 
-  <div class="logoRow">
-   <img src="protect-baltic-logo.png">
-   <img src="helcom-logo.png">
-   <img src="eu-logo.jpg">
-  </div>
+ <div class="logoRow">
+  <img src="protect-baltic-logo.png">
+  <img src="helcom-logo.png">
+  <img src="eu-logo.jpg">
+ </div>
 
-  <div>
-   The development of this website’s content was co-funded by the European Union
-   through the <b>PROTECT BALTIC</b> project.
-  </div>
-
+ <div>
+  The development of this website’s content was co-funded by the European Union
+  through the <b>PROTECT BALTIC</b> project.
  </div>
 
 </div>
