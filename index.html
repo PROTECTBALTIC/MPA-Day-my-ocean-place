@@ -56,7 +56,9 @@ button:disabled{background:#adb5bd}
 #mapHint{position:absolute;left:50%;top:40px;transform:translateX(-50%);background:rgba(255,255,255,0.95);padding:10px 16px;border-radius:20px;box-shadow:0 6px 18px rgba(0,0,0,0.15);font-size:14px;color:#004470;background:white;font-weight:500;pointer-events:none;z-index:500}
 
 .leaflet-control-layers{background:white;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,0.15);border:none;font-family:'Inter',sans-serif;padding:6px 8px}
-
+.leaflet-control-container {
+  z-index: 400 !important;
+}
 @media (max-width:800px){
   body{
     flex-direction:column;
@@ -165,26 +167,33 @@ background:#e7f4ff;
 @media (max-width:800px){
 
   #projectCredits{
-    position: fixed;
-    bottom: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    right: auto;
-    top: auto;
-    width: auto;
-    max-width: 92%;
-    z-index: 1000;
-  }
+  position: fixed;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  padding: 8px 10px;
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+  font-size: 11px;
+  color: #333;
+  z-index: 99999; /* 🔥 force above Leaflet */
+  max-width: 92%;
+  width: max-content;
+}
 
-  #projectCredits .logoRow{
-    justify-content:center;
-    gap:6px;
-  }
+/* logos */
+#projectCredits .logoRow{
+  display:flex;
+  justify-content:center;
+  gap:6px;
+  margin-bottom:6px;
+}
 
-  #projectCredits img{
-    height:24px;
-    max-width:30%;
-  }
+#projectCredits img{
+  height:20px;
+  max-width:28%;
+}
 
   /* keep hint above credits */
   #mapHint{
@@ -231,23 +240,20 @@ My Ocean Place
 </div>
 
 <div id="map">
- <div id="mapHint">Click the map to mark where you are from</div>
+  <div id="mapHint">Click the map to mark where you are from</div>
 </div>
 
-<!-- Project credits -->
 <div id="projectCredits">
+  <div class="logoRow">
+    <img src="protect-baltic-logo.png">
+    <img src="helcom-logo.png">
+    <img src="eu-logo.jpg">
+  </div>
 
- <div class="logoRow">
-  <img src="protect-baltic-logo.png">
-  <img src="helcom-logo.png">
-  <img src="eu-logo.jpg">
- </div>
-
- <div>
-  The development of this website’s content was co-funded by the European Union
-  through the <b>PROTECT BALTIC</b> project.
- </div>
-
+  <div>
+    The development of this website’s content was co-funded by the European Union
+    through the <b>PROTECT BALTIC</b> project.
+  </div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
