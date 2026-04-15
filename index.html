@@ -45,14 +45,16 @@ h2{margin-top:0;color:#004470;font-weight:700}
   height:26px;
   min-width:26px;
   min-height:26px;
+  max-width:26px;
+  max-height:26px;
 
   border-radius:50%;
 
-  display:inline-flex;
+  display:flex;
   align-items:center;
   justify-content:center;
 
-  flex-shrink:0;
+  flex:0 0 26px;        /* 🔥 strongest fix */
   line-height:1;
 
   font-weight:600;
@@ -264,9 +266,9 @@ My Ocean Place
 <div class="subtitle">The ocean is full of places worth protecting.<br><b>Tell us about your favourite ocean place.</b></br></div>
 
 <div class="instructions">
-<div class="step-row"><span class="step active">1</span><span class="step-text">Click where you're from on the map</span></div>
-<div class="step-row"><span class="step">2</span><span class="step-text">Click the ocean place you love on the map</span></div>
-<div class="step-row"><span class="step">3</span><span class="step-text">Tell us who you are and why the ocean place matters to you</span></div>
+<div class="step-row"><div class="step active">1</div><div class="step-text">Click where you're from on the map</div></div>
+<div class="step-row"><div class="step">2</div><div class="step-text">Click the ocean place you love on the map</div></div>
+<div class="step-row"><div class="step">3</div><div class="step-text">Tell us who you are and why the ocean place matters to you</div></div>
 </div>
 
 <input id="name" placeholder="Your name (optional)">
